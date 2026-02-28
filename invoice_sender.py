@@ -1,4 +1,19 @@
-from sender import send_whatsapp
+import requests
 
-def send_invoice(num,amount,bill):
-    send_whatsapp(num,f"🧾 Bill {bill} | ₹{amount}")
+API_URL = "https://api.whatsapp.com/send"
+
+def send_invoice(phone, amount):
+    message = f"""
+🙏 Thank you for visiting!
+
+Your bill: ₹{amount}
+
+Next visit: Flat 10% OFF 🎉
+    """
+
+    payload = {
+        "phone": phone,
+        "text": message
+    }
+
+    requests.post(API_URL, json=payload)
