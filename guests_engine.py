@@ -1,32 +1,30 @@
+import sqlite3
 import streamlit as st
-from local_db import get_conn
-from datetime import date, datetime
+from datetime import datetime
 
-def guests_page(staff_id):
-    st.subheader("👥 Guest Entry")
+conn = sqlite3.connect("database/erp.db", check_same_thread=False)
+cur = conn.cursor()
 
-    conn = get_conn()
-    cur = conn.cursor()
+def guest_entry_ui():
+    st.header("👥 Guest Entry")
 
-    name = st.text_input("Name")
-    phone = st.text_input("Mobile")
-    pax = st.number_input("Pax",1,100,1)
+    name = st.text_input("Guest Name")
+    mobile = st.text_input("Mobile Number")
+
     category = st.selectbox("Category",[
-        "Swiggy","Zomato","EasyDinner","Party",
-        "W/I","VIP","Buffet","Holi","Other"
+        "Swiggy","Zomato","Easy Dinner","Party","Walk-in","VIP","Other"
     ])
-    entry_date = st.date_input("Date",date.today())
-    entry_time = st.time_input("Time",datetime.now().time())
 
-    if st.button("Save"):
+    pax = st.number_input("Number of PAX",1,50,1)
+
+    if st.button("Save Entry"):
         cur.execute("""INSERT INTO guests 
-        (name,phone,pax,category,entry_date,entry_time,added_by_staff_id)
-        VALUES(?,?,?,?,?,?,?)""",
-        (name,phone,pax,category,str(entry_date),str(entry_time),staff_id))
+            (name,mobile,category,pax,visit_date,visit_time,staff_id)
+            VALUES (?,?,?,?,?,?,?)""",
+            (name,mobile,category,pax,
+             datetime.now().date(),
+             datetime.now().time().strftime("%H:%M"),
+             st.session_state["uid"]))
+
         conn.commit()
-        st.success("Guest Saved")
-
-    cur.execute("SELECT * FROM guests ORDER BY id DESC")
-    st.table(cur.fetchall())
-
-    conn.close()
+        st.success("Guest Entry Saved")
