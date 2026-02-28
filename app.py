@@ -1,32 +1,33 @@
 import streamlit as st
-from local_db import create_tables
-from staff_engine import staff_page
-from guests_engine import guests_page
-from attendance_engine import attendance_page
-from ai_engine import ai_dashboard
+import sqlite3
 
-create_tables()
+conn = sqlite3.connect("database/erp.db", check_same_thread=False)
+cur = conn.cursor()
 
-st.set_page_config(page_title="Raunak Ultra ERP AI", layout="wide")
+def login_ui():
+    st.title("🔐 ERP Login")
 
-st.sidebar.title("🚀 Navigation")
+    role = st.selectbox("Select Role", ["admin", "staff"])
 
-role = st.sidebar.selectbox("Role", ["Admin","Manager","Staff","Viewer"])
-staff_id = st.sidebar.number_input("Staff ID", 1, value=1)
+    cur.execute("SELECT name FROM staff WHERE role=?", (role,))
+    names = [x[0] for x in cur.fetchall()]
 
-menu = st.sidebar.radio("Go To", ["Dashboard","Guests","Attendance","Staff","AI Insights"])
+    username = st.selectbox("Select Name", names)
+    password = st.text_input("Password", type="password")
 
-if menu == "Dashboard":
-    st.title("Raunak Ultra ERP AI 🚀")
+    if st.button("Login"):
+        cur.execute("SELECT id FROM staff WHERE name=? AND password=?", (username,password))
+        user = cur.fetchone()
+        if user:
+            st.session_state["user"] = username
+            st.session_state["role"] = role
+            st.session_state["uid"] = user[0]
+            st.experimental_rerun()
+        else:
+            st.error("Wrong Password")
 
-elif menu == "Guests":
-    guests_page(staff_id)
-
-elif menu == "Attendance":
-    attendance_page(role)
-
-elif menu == "Staff":
-    staff_page(role)
-
-elif menu == "AI Insights":
-    ai_dashboard()
+def logout():
+    if st.sidebar.button("🚪 Logout"):
+        for k in st.session_state.keys():
+            del st.session_state[k]
+        st.experimental_rerun()
