@@ -1,4 +1,6 @@
-def dynamic_price(price,demand):
-    if demand>80: return price*1.15
-    if demand<30: return price*0.9
-    return price
+def dynamic_price(base_price, crowd_level):
+    if crowd_level == "LOW":
+        return int(base_price * 0.90)
+    elif crowd_level == "HIGH":
+        return int(base_price * 1.15)
+    return base_price
