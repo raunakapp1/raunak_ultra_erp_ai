@@ -2,10 +2,12 @@ import streamlit as st
 import sys
 import os
 
-# Force root path add
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Add root directory to python path
+ROOT = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(ROOT)
 
 from ai_layer.forecast_ai import predict_tomorrow_revenue
+
 
 def admin_dashboard():
     st.title("📊 Raunak Ultra ERP AI Dashboard")
