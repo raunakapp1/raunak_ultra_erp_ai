@@ -1,12 +1,15 @@
 import streamlit as st
-import sys
 import os
+import sys
 
-# Add root directory to python path
-ROOT = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(ROOT)
+# 🔧 Hard fix for Streamlit Cloud import path
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+AI_DIR = os.path.join(BASE_DIR, "ai_layer")
 
-from ai_layer.forecast_ai import predict_tomorrow_revenue
+if AI_DIR not in sys.path:
+    sys.path.insert(0, AI_DIR)
+
+from forecast_ai import predict_tomorrow_revenue
 
 
 def admin_dashboard():
