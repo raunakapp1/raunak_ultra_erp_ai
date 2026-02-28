@@ -14,10 +14,10 @@ st.set_page_config(
     layout="wide"
 )
 
-# ---------- INIT DB ----------
+# ---------- INIT DATABASE ----------
 create_tables()
 
-# ---------- SESSION INIT ----------
+# ---------- SESSION ----------
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
@@ -35,21 +35,16 @@ if not st.session_state.logged_in:
 # ---------- SIDEBAR ----------
 st.sidebar.title("🚀 Raunak Ultra ERP AI")
 
-# LOGOUT BUTTON
 if st.sidebar.button("🔓 Logout"):
     st.session_state.logged_in = False
-    st.session_state.role = None
     st.experimental_rerun()
 
-# USER INFO
 st.sidebar.success(f"Role: {st.session_state.role}")
 
-if st.session_state.role in ["Admin", "Manager", "Staff"]:
-    st.session_state.staff_id = st.sidebar.number_input(
-        "Staff ID", min_value=1, value=st.session_state.staff_id
-    )
+st.session_state.staff_id = st.sidebar.number_input(
+    "Staff ID", min_value=1, value=st.session_state.staff_id
+)
 
-# MENU
 menu = st.sidebar.radio(
     "📂 Navigation",
     ["Dashboard", "Guests", "Attendance", "Staff", "AI Insights"]
@@ -61,7 +56,7 @@ if menu == "Dashboard":
         admin_dashboard()
     else:
         st.subheader("📊 Dashboard")
-        st.info("Limited dashboard for non-admin users")
+        st.info("Limited access")
 
 elif menu == "Guests":
     guests_page(st.session_state.staff_id)
@@ -73,14 +68,13 @@ elif menu == "Staff":
     if st.session_state.role == "Admin":
         staff_page(st.session_state.role)
     else:
-        st.warning("❌ Access Denied")
+        st.warning("Access Denied")
 
 elif menu == "AI Insights":
     if st.session_state.role in ["Admin", "Manager"]:
         ai_dashboard()
     else:
-        st.warning("❌ Access Denied")
+        st.warning("Access Denied")
 
-# ---------- FOOTER ----------
 st.markdown("---")
 st.caption("⚡ Powered by Raunak Ultra ERP AI")
