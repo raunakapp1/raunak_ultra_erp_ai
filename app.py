@@ -2,8 +2,8 @@ import streamlit as st
 import sys
 import os
 
-# Force root path add
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+ROOT = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(ROOT)
 
 from dashboard import admin_dashboard
 
