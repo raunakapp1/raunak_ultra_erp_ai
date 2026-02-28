@@ -1,19 +1,35 @@
--- Future SaaS expansion tables
-CREATE TABLE billing_sync(
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-bill_no TEXT,
-total REAL,
-discount REAL,
-staff_id INTEGER,
-datetime TEXT
+CREATE TABLE staff (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    role TEXT CHECK(role IN ('admin','staff')),
+    password TEXT NOT NULL
 );
 
-CREATE TABLE billing_modifications(
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-bill_no TEXT,
-staff_id INTEGER,
-mod_type TEXT,
-old_value TEXT,
-new_value TEXT,
-created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE guests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    mobile TEXT,
+    category TEXT,
+    pax INTEGER,
+    visit_date TEXT,
+    visit_time TEXT,
+    staff_id INTEGER,
+    FOREIGN KEY(staff_id) REFERENCES staff(id)
+);
+
+CREATE TABLE bills (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guest_id INTEGER,
+    amount REAL,
+    platform TEXT,
+    bill_time TEXT,
+    FOREIGN KEY(guest_id) REFERENCES guests(id)
+);
+
+CREATE TABLE fraud_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    staff_id INTEGER,
+    issue TEXT,
+    score REAL,
+    created_at TEXT
 );
