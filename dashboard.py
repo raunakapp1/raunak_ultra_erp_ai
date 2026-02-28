@@ -11,6 +11,7 @@ def admin_dashboard():
 
     st.header("📊 Admin Control Dashboard")
 
+    # -------- TOP KPI METRICS --------
     col1, col2, col3, col4 = st.columns(4)
 
     cur.execute("SELECT COUNT(*) FROM guests")
@@ -31,34 +32,50 @@ def admin_dashboard():
 
     st.divider()
 
+    # -------- CATEGORY WISE REPORT --------
     st.subheader("📌 Category Wise Report")
+
     cur.execute("""
         SELECT category, COUNT(*), SUM(pax)
         FROM guests
         GROUP BY category
     """)
+
     cat_data = cur.fetchall()
 
     if cat_data:
         df = pd.DataFrame(cat_data, columns=["Category", "Guests", "Total PAX"])
         st.dataframe(df, use_container_width=True)
         st.bar_chart(df.set_index("Category")["Guests"])
+    else:
+        st.info("No category data found")
 
-    st.subheader("📅 Date Wise Report")
+    st.divider()
+
+    # -------- DATE WISE REPORT --------
+    st.subheader("📅 Date Wise Business Report")
+
     cur.execute("""
         SELECT entry_date, COUNT(*), SUM(pax)
         FROM guests
         GROUP BY entry_date
         ORDER BY entry_date DESC
     """)
+
     date_data = cur.fetchall()
 
     if date_data:
         df2 = pd.DataFrame(date_data, columns=["Date", "Guests", "PAX"])
         st.dataframe(df2, use_container_width=True)
         st.line_chart(df2.set_index("Date")["Guests"])
+    else:
+        st.info("No date-wise data found")
 
+    st.divider()
+
+    # -------- STAFF PERFORMANCE --------
     st.subheader("👨‍💼 Staff Performance")
+
     cur.execute("""
         SELECT s.name, COUNT(g.id)
         FROM guests g
@@ -67,11 +84,17 @@ def admin_dashboard():
     """)
 
     staff_data = cur.fetchall()
+
     if staff_data:
         df3 = pd.DataFrame(staff_data, columns=["Staff", "Guest Entries"])
         st.dataframe(df3, use_container_width=True)
         st.bar_chart(df3.set_index("Staff")["Guest Entries"])
+    else:
+        st.info("No staff performance data")
 
+    st.divider()
+
+    # -------- AI OFFER --------
     offer = generate_offer(total_guests)
     st.success(f"🎯 AI Suggested Offer: {offer}")
 
