@@ -1,30 +1,51 @@
-import sqlite3
 import streamlit as st
-from datetime import datetime
+from local_db import get_conn
+from datetime import date
 
-conn = sqlite3.connect("database/erp.db", check_same_thread=False)
-cur = conn.cursor()
+def guests_page(current_staff_id):
 
-def guest_entry_ui():
-    st.header("👥 Guest Entry")
+    st.subheader("👥 Guest Entry Panel")
 
-    name = st.text_input("Guest Name")
-    mobile = st.text_input("Mobile Number")
+    conn = get_conn()
+    cursor = conn.cursor()
 
-    category = st.selectbox("Category",[
-        "Swiggy","Zomato","Easy Dinner","Party","Walk-in","VIP","Other"
-    ])
+    with st.expander("➕ Add Guest"):
+        name = st.text_input("Guest Name")
+        phone = st.text_input("Mobile Number")
+        pax = st.number_input("Number of Guests (PAX)", min_value=1, max_value=100, value=1)
 
-    pax = st.number_input("Number of PAX",1,50,1)
+        category = st.selectbox(
+            "Category",
+            ["Swiggy", "Zomato", "Walk-in", "Dinner", "Party", "W/I", "VIP", "Other"]
+        )
 
-    if st.button("Save Entry"):
-        cur.execute("""INSERT INTO guests 
-            (name,mobile,category,pax,visit_date,visit_time,staff_id)
-            VALUES (?,?,?,?,?,?,?)""",
-            (name,mobile,category,pax,
-             datetime.now().date(),
-             datetime.now().time().strftime("%H:%M"),
-             st.session_state["uid"]))
+        entry_date = st.date_input("Visit Date", date.today())
 
-        conn.commit()
-        st.success("Guest Entry Saved")
+        if st.button("✅ Save Guest Entry"):
+            cursor.execute("""
+                INSERT INTO guests (name, phone, pax, category, entry_date, added_by_staff_id)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (name, phone, pax, category, str(entry_date), current_staff_id))
+
+            conn.commit()
+            st.success("Guest Entry Saved Successfully 🎉")
+
+    st.divider()
+
+    st.subheader("📋 Today's Guest List")
+
+    cursor.execute("""
+        SELECT g.name, g.phone, g.pax, g.category, s.name
+        FROM guests g
+        JOIN staff s ON g.added_by_staff_id = s.id
+        WHERE g.entry_date = ?
+    """, (str(date.today()),))
+
+    rows = cursor.fetchall()
+
+    if rows:
+        st.table(rows)
+    else:
+        st.info("No guest entries for today")
+
+    conn.close()
